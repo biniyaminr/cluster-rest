@@ -5,3 +5,8 @@ type FeedFetcher interface {
 	FetchFeedInformation(link string) (FeedInformation, error)
 	CheckSupported(link string) (bool, error)
 }
+
+type ArticleFetcher interface {
+	FetchArticleContents(url string) (ArticleContents, error)
+	FetchArticleImage(url string) (string, error)
+}
