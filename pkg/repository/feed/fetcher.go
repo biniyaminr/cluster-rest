@@ -2,7 +2,7 @@ package repository
 
 import (
 	"encoding/xml"
-	"github.com/karamazovian/Web-I-RSSManager/pkg/listing"
+	"github.com/karamazovian/cluster-rest/pkg/listing"
 	"io/ioutil"
 	"log"
 	"net/http"

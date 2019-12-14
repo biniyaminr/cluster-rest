@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/karamazovian/Web-I-RSSManager/pkg/listing"
+	"github.com/karamazovian/cluster-rest/pkg/listing"
 	"github.com/thatguystone/swan"
 	"log"
 )
