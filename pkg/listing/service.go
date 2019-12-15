@@ -12,7 +12,7 @@ func (als *ArticleListingService) FetchArticleContents(url string) (ArticleConte
 	contents := ArticleContents{}
 	contents, err := als.fetcher.FetchArticleContents(url)
 	if err != nil {
-		return ArticleContents{}, nil
+		return ArticleContents{}, err
 	}
 	return contents, nil
 }
@@ -21,7 +21,7 @@ func (als *ArticleListingService) FetchMultipleArticleContents(urls ...string) (
 	articleContents := map[string]ArticleContents{}
 	articleContents, err := als.fetcher.FetchMultipleArticlesContents(urls...)
 	if err != nil {
-		return articleContents, nil
+		return articleContents, err
 	}
 	return articleContents, nil
 }
