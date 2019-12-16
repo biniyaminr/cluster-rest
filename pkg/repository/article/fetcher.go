@@ -1,4 +1,4 @@
-package repository
+package article
 
 import (
 	"github.com/karamazovian/cluster-rest/pkg/listing"
@@ -24,7 +24,7 @@ func (baf *BasicArticleFetcher) FetchArticleContents(url string) (listing.Articl
 		Description:  content.Meta.Description,
 		TextContent:  content.CleanedText,
 	}
-	return articleContents, nil
+	return articleContents, err
 }
 
 func (baf *BasicArticleFetcher) FetchMultipleArticlesContents(urls ...string) (map[string]listing.ArticleContents, error) {
@@ -45,7 +45,7 @@ func (baf *BasicArticleFetcher) FetchArticleImage(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return content.Img.Src, nil
+	return content.Img.Src, err
 }
 
 //FetchMultipleArticleImages fetches the images of multiple articles and returns a map[articleURL]imageURL

@@ -1,5 +1,7 @@
 package listing
 
+import "fmt"
+
 type ArticleListingService struct {
 	fetcher ArticleFetcher
 }
@@ -12,16 +14,16 @@ func (als *ArticleListingService) FetchArticleContents(url string) (ArticleConte
 	contents := ArticleContents{}
 	contents, err := als.fetcher.FetchArticleContents(url)
 	if err != nil {
-		return ArticleContents{}, nil
+		fmt.Println("Printing: " + err.Error())
 	}
-	return contents, nil
+	return contents, err
 }
 
 func (als *ArticleListingService) FetchMultipleArticleContents(urls ...string) (map[string]ArticleContents, error) {
 	articleContents := map[string]ArticleContents{}
 	articleContents, err := als.fetcher.FetchMultipleArticlesContents(urls...)
 	if err != nil {
-		return articleContents, nil
+		return articleContents, err
 	}
 	return articleContents, nil
 }
@@ -29,16 +31,10 @@ func (als *ArticleListingService) FetchMultipleArticleContents(urls ...string) (
 func (als *ArticleListingService) FetchMultipleArticleImages(articleURLs []string) (map[string]string, error) {
 	var imagesMap map[string]string
 	imagesMap, err := als.fetcher.FetchMultipleArticleImages(articleURLs...)
-	if err != nil {
-		return imagesMap, err
-	}
-	return imagesMap, nil
+	return imagesMap, err
 }
 
 func (als *ArticleListingService) FetchArticleImage(url string) (string, error) {
 	imageURL, err := als.fetcher.FetchArticleImage(url)
-	if err != nil {
-		return "", err
-	}
-	return imageURL, nil
+	return imageURL, err
 }
