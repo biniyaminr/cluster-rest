@@ -5,7 +5,6 @@ import (
 	//"encoding/json"
 	"fmt"
 	"github.com/karamazovian/cluster-rest/pkg/listing"
-	"log"
 	"net/http"
 )
 
@@ -18,34 +17,32 @@ func NewListingHandler(lister listing.ArticleLister) *ListingHandler {
 }
 
 func (lh *ListingHandler) FetchArticleContents(w http.ResponseWriter, r *http.Request) {
-	articleURL := r.URL.Query().Get("url")
-	fmt.Println("Requested URL: " + articleURL)
+	queryURL := r.URL.Query()["url"]
+	if len(queryURL[0]) != 0 {
+		fmt.Println("Requested URL: " + queryURL[0])
+	}
 	response := struct {
-		Status  string            `json:"status"`
-		Data    []ArticleContents `json:"data"`
-		Message string            `json:"message"`
+		Status  string                    `json:"status"`
+		Data    []listing.ArticleContents `json:"data"`
+		Message string                    `json:"message"`
 	}{}
-	if articleURL == "" {
+	if len(queryURL[0]) == 0 {
 		response.Status = "Error"
-		response.Data = []ArticleContents{}
+		response.Data = []listing.ArticleContents{}
 		response.Message = "You need to specify a URL"
-		jsonBytes, _ := json.Marshal(response)
-		w.Write(jsonBytes)
+		_ = json.NewEncoder(w).Encode(response)
 		return
 	}
-	articleContents, err := lh.lister.FetchArticleContents(articleURL)
-	contents := (ArticleContents)(articleContents)
-	data := []ArticleContents{contents}
+	articleContents, err := lh.lister.FetchArticleContents(queryURL[0])
 	if err != nil {
-		log.Fatal("Erred when fetching article contents:\n" + err.Error())
+		response.Status = "Error"
+		response.Data = []listing.ArticleContents{}
+		response.Message = err.Error()
+		_ = json.NewEncoder(w).Encode(response)
+		return
 	}
-
-	response.Status = "200 OK"
+	contents := articleContents
+	data := []listing.ArticleContents{contents}
 	response.Data = data
-	response.Message = " "
-	//log.Fatal("Error at encoder: " + json.NewEncoder(w).Encode(response).Error())
-	jsonBytes, err := json.Marshal(response)
-	//jsonString := string(jsonBytes)
-	w.Write(jsonBytes)
-	return
+	_ = json.NewEncoder(w).Encode(response)
 }
