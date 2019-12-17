@@ -1,6 +1,6 @@
 package listing
 
-type ArticleFetcher interface {
+type ArticleFetcherRepo interface {
 	FetchArticleContents(url string) (ArticleContents, error)
 	FetchMultipleArticlesContents(urls ...string) (map[string]ArticleContents, error)
 	FetchArticleImage(url string) (string, error)
@@ -9,7 +9,7 @@ type ArticleFetcher interface {
 
 type ArticleLister interface {
 	FetchArticleContents(url string) (ArticleContents, error)
-	FetchMultipleArticleContents(urls ...string) (map[string]ArticleContents, error)
-	FetchMultipleArticleImages(articleURLs []string) (map[string]string, error)
+	FetchMultipleArticleContents(urls []string) (map[string]ArticleContents, error)
 	FetchArticleImage(url string) (string, error)
+	FetchMultipleArticleImages(articleURLs []string) (map[string]string, error)
 }

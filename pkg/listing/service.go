@@ -3,10 +3,10 @@ package listing
 import "fmt"
 
 type ArticleListingService struct {
-	fetcher ArticleFetcher
+	fetcher ArticleFetcherRepo
 }
 
-func NewArticleListingService(fetcher ArticleFetcher) *ArticleListingService {
+func NewArticleListingService(fetcher ArticleFetcherRepo) *ArticleListingService {
 	return &ArticleListingService{fetcher: fetcher}
 }
 
@@ -19,7 +19,7 @@ func (als *ArticleListingService) FetchArticleContents(url string) (ArticleConte
 	return contents, err
 }
 
-func (als *ArticleListingService) FetchMultipleArticleContents(urls ...string) (map[string]ArticleContents, error) {
+func (als *ArticleListingService) FetchMultipleArticleContents(urls []string) (map[string]ArticleContents, error) {
 	articleContents := map[string]ArticleContents{}
 	articleContents, err := als.fetcher.FetchMultipleArticlesContents(urls...)
 	if err != nil {
