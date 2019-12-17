@@ -2,13 +2,22 @@ package sharing
 
 import "time"
 
+type SortOrder int
+
+const (
+	ASC SortOrder = iota
+	DEC SortOrder = iota
+)
+
 //PublicEntry represents an article that has been shared to the public
 type PublicEntry struct {
 	EntryID          string
+	ArticleID        string
 	ContainedArticle *Article
 	SharedBy         string
+	SharedDate       time.Time
 	LikesCount       int
-	Comments         []Comment
+	Comments         *[]Comment
 }
 
 //Article represents an article that has been saved in the database
