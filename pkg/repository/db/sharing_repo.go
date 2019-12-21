@@ -13,6 +13,7 @@ func NewSharingRepoPSQL(conn *sql.DB) *SharingRepoPSQL {
 	return &SharingRepoPSQL{conn: conn}
 }
 
+//FetchPublicEntries returns an array of the specified number fo public entries
 func (s SharingRepoPSQL) FetchPublicEntries(offset, limit int, sortBy string, order sharing.SortOrder) ([]sharing.PublicEntry, error) {
 	var orderBy string
 	var entries []sharing.PublicEntry
@@ -29,14 +30,19 @@ func (s SharingRepoPSQL) FetchPublicEntries(offset, limit int, sortBy string, or
 	for results.Next() {
 		entry := sharing.PublicEntry{}
 		//TODO remember that you have to set parseTime=true in the connection string of the db
-		results.Scan(&entry.EntryID, &entry.ArticleID, &entry.SharedBy, &entry.SharedDate, &entry.LikesCount)
+		err = results.Scan(&entry.EntryID, &entry.ArticleID, &entry.SharedBy, &entry.SharedDate, &entry.LikesCount)
 		entries = append(entries, entry)
 	}
 	return entries, err
 }
 
-func (s SharingRepoPSQL) FetchComments(entryID string, offset, limit int) ([]sharing.Comment, error) {
+//FetchComments returns an array of a number of comments on a public entry
+func (s SharingRepoPSQL) FetchComments(entryID int, offset, limit int) ([]sharing.Comment, error) {
 	var comments []sharing.Comment
+	//The limit will be 50 by default
+	if limit == 0 {
+		limit = 50
+	}
 	results, err := s.conn.Query("SELECT * FROM comments WHERE entry_id=$1 ORDER BY commented_date LIMIT $2 OFFSET $3", entryID, limit, offset)
 	if err != nil {
 		return comments, err
@@ -54,6 +60,7 @@ func (s SharingRepoPSQL) FetchComments(entryID string, offset, limit int) ([]sha
 	return comments, err
 }
 
+//FetchArticle returns an instance of an Article with the specified ID
 func (s SharingRepoPSQL) FetchArticle(articleID int) (sharing.Article, error) {
 	article := sharing.Article{}
 	result, err := s.conn.Query("SELECT * FROM articles WHERE article_id=$1", articleID)
@@ -61,7 +68,7 @@ func (s SharingRepoPSQL) FetchArticle(articleID int) (sharing.Article, error) {
 		return article, err
 	}
 	for result.Next() {
-		result.Scan(&article.ArticleID, &article.SourceRSS, &article.Title, &article.Link)
+		err = result.Scan(&article.ArticleID, &article.SourceRSS, &article.Title, &article.Link)
 	}
 	return article, err
 }

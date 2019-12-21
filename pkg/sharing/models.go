@@ -12,7 +12,7 @@ const (
 //PublicEntry represents an article that has been shared to the public
 type PublicEntry struct {
 	EntryID          string
-	ArticleID        string
+	ArticleID        int
 	ContainedArticle *Article
 	SharedBy         string
 	SharedDate       time.Time
