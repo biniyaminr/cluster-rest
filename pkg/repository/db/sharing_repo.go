@@ -2,7 +2,7 @@ package db
 
 import (
 	"database/sql"
-	"github.com/karamazovian/cluster-rest/pkg/sharing"
+	"github.com/karamazovian/cluster-rest/pkg/domain/sharing"
 )
 
 type SharingRepoPSQL struct {
@@ -23,7 +23,8 @@ func (s SharingRepoPSQL) FetchPublicEntries(offset, limit int, sortBy string, or
 	case sharing.DEC:
 		orderBy = "DESC"
 	}
-	results, err := s.conn.Query("SELECT * FROM public_entries ORDER BY shared_date $1 LIMIT $2 OFFSET $3", orderBy, limit, offset)
+	sortBy = "shared_date"
+	results, err := s.conn.Query("SELECT * FROM public_entries ORDER BY $1 $2 LIMIT $3 OFFSET $4", sortBy, orderBy, limit, offset)
 	if err != nil {
 		return entries, err
 	}
@@ -36,6 +37,13 @@ func (s SharingRepoPSQL) FetchPublicEntries(offset, limit int, sortBy string, or
 	return entries, err
 }
 
+func (s SharingRepoPSQL) FetchPublicEntry(entryID int) (sharing.PublicEntry, error) {
+	entry := sharing.PublicEntry{}
+	query := "SELECT * FROM public_entries WHERE entry_id=$1"
+	err := s.conn.QueryRow(query, entryID).Scan(&entry.EntryID, &entry.ArticleID, &entry.SharedBy, &entry.SharedDate, &entry.LikesCount)
+	return entry, err
+}
+
 //FetchComments returns an array of a number of comments on a public entry
 func (s SharingRepoPSQL) FetchComments(entryID int, offset, limit int) ([]sharing.Comment, error) {
 	var comments []sharing.Comment
@@ -43,7 +51,8 @@ func (s SharingRepoPSQL) FetchComments(entryID int, offset, limit int) ([]sharin
 	if limit == 0 {
 		limit = 50
 	}
-	results, err := s.conn.Query("SELECT * FROM comments WHERE entry_id=$1 ORDER BY commented_date LIMIT $2 OFFSET $3", entryID, limit, offset)
+	query := "SELECT * FROM comments WHERE entry_id=$1 ORDER BY commented_date LIMIT $2 OFFSET $3"
+	results, err := s.conn.Query(query, entryID, limit, offset)
 	if err != nil {
 		return comments, err
 	}
@@ -51,7 +60,7 @@ func (s SharingRepoPSQL) FetchComments(entryID int, offset, limit int) ([]sharin
 		//var ignore string
 		comment := sharing.Comment{}
 		//TODO remember that you have to set parseTime=true in the connection string of the db
-		err = results.Scan(&comment.PostedBy, nil, &comment.Contents, &comment.CommentedOn)
+		err = results.Scan(&comment.CommentID, &comment.PostedBy, nil, &comment.Contents, &comment.CommentedOn)
 		if err != nil {
 			return comments, nil
 		}
@@ -71,4 +80,29 @@ func (s SharingRepoPSQL) FetchArticle(articleID int) (sharing.Article, error) {
 		err = result.Scan(&article.ArticleID, &article.SourceRSS, &article.Title, &article.Link)
 	}
 	return article, err
+}
+
+//AddArticle inserts a new article and returns its id
+func (s SharingRepoPSQL) AddArticle(article *sharing.Article) (int, error) {
+	var newID int
+	query := "INSERT INTO TABLE articles (source_rss, title, link) VALUES($1, $2, $3) RETURNING article_id"
+	err := s.conn.QueryRow(query, article.SourceRSS, article.Title, article.Link).Scan(&newID)
+	article.ArticleID = newID
+	return newID, err
+}
+
+//AddPublicEntry adds a single public entry into the db and returns its id
+func (s SharingRepoPSQL) AddPublicEntry(entry *sharing.PublicEntry) (int, error) {
+	var newID int
+	query := "INSERT INTO TABLE public_entries (article_id, shared_by, shared_date, likes_count) VALUES($1, $2, $3, $4)"
+	err := s.conn.QueryRow(query, entry.ArticleID, entry.SharedBy, entry.SharedDate, 0).Scan(&newID)
+	entry.EntryID = newID
+	return newID, err
+}
+
+//AddRecommendation adds a recommendation into thd db
+func (s SharingRepoPSQL) AddRecommendation(recommendation sharing.Recommendation) error {
+	query := "INSERT INTO TABLE recommended_articles (article_id, sender_username, receiver_username, message)"
+	_, err := s.conn.Query(query, recommendation.ArticleID, recommendation.SenderUsername, recommendation.ReceiverUsername, recommendation.Message)
+	return err
 }

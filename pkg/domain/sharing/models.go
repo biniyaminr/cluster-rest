@@ -11,7 +11,7 @@ const (
 
 //PublicEntry represents an article that has been shared to the public
 type PublicEntry struct {
-	EntryID          string
+	EntryID          int
 	ArticleID        int
 	ContainedArticle *Article
 	SharedBy         string
@@ -22,14 +22,15 @@ type PublicEntry struct {
 
 //Article represents an article that has been saved in the database
 type Article struct {
-	ArticleID string
-	SourceRSS string
+	ArticleID int
+	SourceRSS int
 	Title     string
 	Link      string
 }
 
 //Comment represents a comment that has been posted to a public entry
 type Comment struct {
+	CommentID   int
 	PostedBy    string
 	CommentedOn time.Time
 	Contents    string
@@ -39,5 +40,7 @@ type Comment struct {
 type Recommendation struct {
 	SenderUsername   string
 	ReceiverUsername string
+	ArticleID        int
 	Article          *Article
+	Message          string
 }
