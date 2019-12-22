@@ -66,8 +66,34 @@ func (a ArticleSharingService) ShareToUser(senderUsername, receiverUsername, mes
 		Message:          message,
 		ArticleID:        articleID,
 	}
-	err := a.sharingRepo.AddRecommendation(newRecommendation)
+	err := a.sharingRepo.AddRecommendation(&newRecommendation)
 	return newRecommendation, err
+}
+
+//AddComment adds a comment to a post
+func (a ArticleSharingService) AddComment(username, text string, entryID int) error {
+	comment := Comment{
+		PostedBy:    username,
+		CommentedOn: time.Now(),
+		Contents:    text,
+	}
+	err := a.sharingRepo.AddComment(comment, entryID)
+	return err
+}
+
+//DeleteComment deletes a comment from a post
+func (a ArticleSharingService) DeleteComment(entryID, commentID int) error {
+	return a.sharingRepo.DeleteComment(entryID, commentID)
+}
+
+//AddLike adds a like to a post
+func (a ArticleSharingService) AddLike(entryID int, username string) error {
+	return a.sharingRepo.AddLike(entryID, username)
+}
+
+//DeleteLike deletes a like
+func (a ArticleSharingService) DeleteLike(entryID int, username string) error {
+	return a.sharingRepo.DeleteLike(entryID, username)
 }
 
 //addArticle is a utility function that adds a new article instance to the db and returns it

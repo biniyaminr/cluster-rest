@@ -2,11 +2,17 @@ package sharing
 
 import "time"
 
-type SortOrder int
+type SortOrder string
+type SortBy string
 
 const (
-	ASC SortOrder = iota
-	DEC SortOrder = iota
+	ASC SortOrder = "ASC"
+	DEC SortOrder = "DESC"
+)
+
+const (
+	SHARED_DATE SortBy = "shared_date"
+	LIKE_COUNT  SortBy = "likes_count"
 )
 
 //PublicEntry represents an article that has been shared to the public

@@ -2,7 +2,6 @@ package rest
 
 import (
 	"encoding/json"
-	//"encoding/json"
 	"fmt"
 	"github.com/karamazovian/cluster-rest/pkg/domain/articlehandling"
 	"net/http"

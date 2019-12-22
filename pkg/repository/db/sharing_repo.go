@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"github.com/karamazovian/cluster-rest/pkg/domain/sharing"
+	"time"
 )
 
 type SharingRepoPSQL struct {
@@ -14,17 +15,9 @@ func NewSharingRepoPSQL(conn *sql.DB) *SharingRepoPSQL {
 }
 
 //FetchPublicEntries returns an array of the specified number fo public entries
-func (s SharingRepoPSQL) FetchPublicEntries(offset, limit int, sortBy string, order sharing.SortOrder) ([]sharing.PublicEntry, error) {
-	var orderBy string
+func (s SharingRepoPSQL) FetchPublicEntries(offset, limit int, sortBy sharing.SortBy, order sharing.SortOrder) ([]sharing.PublicEntry, error) {
 	var entries []sharing.PublicEntry
-	switch order {
-	case sharing.ASC:
-		orderBy = "ASC"
-	case sharing.DEC:
-		orderBy = "DESC"
-	}
-	sortBy = "shared_date"
-	results, err := s.conn.Query("SELECT * FROM public_entries ORDER BY $1 $2 LIMIT $3 OFFSET $4", sortBy, orderBy, limit, offset)
+	results, err := s.conn.Query("SELECT * FROM public_entries ORDER BY $1 $2 LIMIT $3 OFFSET $4", sortBy, order, limit, offset)
 	if err != nil {
 		return entries, err
 	}
@@ -101,8 +94,36 @@ func (s SharingRepoPSQL) AddPublicEntry(entry *sharing.PublicEntry) (int, error)
 }
 
 //AddRecommendation adds a recommendation into thd db
-func (s SharingRepoPSQL) AddRecommendation(recommendation sharing.Recommendation) error {
+func (s SharingRepoPSQL) AddRecommendation(recommendation *sharing.Recommendation) error {
 	query := "INSERT INTO TABLE recommended_articles (article_id, sender_username, receiver_username, message)"
 	_, err := s.conn.Query(query, recommendation.ArticleID, recommendation.SenderUsername, recommendation.ReceiverUsername, recommendation.Message)
+	return err
+}
+
+//AddLike adds a like from a user to a public entry
+func (s SharingRepoPSQL) AddLike(entryID int, username string) error {
+	query := "INSERT INTO TABLE likes (username, entry_id, liked_date) VALUES ($1, $2, $3)"
+	err := s.conn.QueryRow(query, username, entryID, time.Now()).Scan()
+	return err
+}
+
+//DeleteLike deletes a like
+func (s SharingRepoPSQL) DeleteLike(entryID int, username string) error {
+	query := "DELETE FROM likes WHERE entry_id=$1 AND username=$2"
+	err := s.conn.QueryRow(query, entryID, username).Scan()
+	return err
+}
+
+//AddComment adds a comment to a public entry
+func (s SharingRepoPSQL) AddComment(comment sharing.Comment, entryID int) error {
+	query := "INSERT INTO comments (username, entry_id, comment, commented_date) VALUES($1, $2, $3, $4)"
+	err := s.conn.QueryRow(query, comment.PostedBy, entryID, comment.Contents, comment.CommentedOn).Scan()
+	return err
+}
+
+//DeleteComment deletes a comment from a public entry
+func (s SharingRepoPSQL) DeleteComment(entryID, commentID int) error {
+	query := "DELETE FROM comments WHERE comment_id=$1 AND entry_id=$2"
+	err := s.conn.QueryRow(query, commentID, entryID).Scan()
 	return err
 }
