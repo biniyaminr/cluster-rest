@@ -1,4 +1,4 @@
-package article_handling
+package articlehandling
 
 type ArticleFetcherRepo interface {
 	FetchArticleContents(url string) (ArticleContents, error)

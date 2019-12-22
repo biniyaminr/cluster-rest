@@ -1,4 +1,4 @@
-package article_handling
+package articlehandling
 
 import "fmt"
 

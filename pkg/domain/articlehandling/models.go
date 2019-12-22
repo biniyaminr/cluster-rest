@@ -1,4 +1,4 @@
-package article_handling
+package articlehandling
 
 //ArticleContents defines the basic contents of an article.
 type ArticleContents struct {

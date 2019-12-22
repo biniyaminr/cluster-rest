@@ -1,7 +1,7 @@
 package article
 
 import (
-	"github.com/karamazovian/cluster-rest/pkg/domain/article_handling"
+	"github.com/karamazovian/cluster-rest/pkg/domain/articlehandling"
 	"github.com/thatguystone/swan"
 )
 
@@ -12,12 +12,12 @@ func NewBasicArticleFetcher() *BasicArticleFetcher {
 }
 
 //FetchArticleContents fetches the basic contents of the article from the given url
-func (baf *BasicArticleFetcher) FetchArticleContents(url string) (article_handling.ArticleContents, error) {
+func (baf *BasicArticleFetcher) FetchArticleContents(url string) (articlehandling.ArticleContents, error) {
 	content, err := swan.FromURL(url)
 	if err != nil {
-		return article_handling.ArticleContents{}, err
+		return articlehandling.ArticleContents{}, err
 	}
-	articleContents := article_handling.ArticleContents{
+	articleContents := articlehandling.ArticleContents{
 		Title:        content.Meta.Title,
 		ArticleImage: content.Img.Src,
 		Authors:      content.Meta.Authors,
@@ -27,8 +27,8 @@ func (baf *BasicArticleFetcher) FetchArticleContents(url string) (article_handli
 	return articleContents, err
 }
 
-func (baf *BasicArticleFetcher) FetchMultipleArticlesContents(urls ...string) (map[string]article_handling.ArticleContents, error) {
-	contents := map[string]article_handling.ArticleContents{}
+func (baf *BasicArticleFetcher) FetchMultipleArticlesContents(urls ...string) (map[string]articlehandling.ArticleContents, error) {
+	contents := map[string]articlehandling.ArticleContents{}
 	for _, url := range urls {
 		currentArticle, err := baf.FetchArticleContents(url)
 		if err != nil {
